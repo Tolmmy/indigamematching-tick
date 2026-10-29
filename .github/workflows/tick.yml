@@ -1,0 +1,26 @@
+name: tick
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: none
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 定期処理を叩く
+        env:
+          TICK_URL: ${{ secrets.TICK_URL }}
+          TICK_TOKEN: ${{ secrets.TICK_TOKEN }}
+        run: |
+          if [ -z "$TICK_URL" ] || [ -z "$TICK_TOKEN" ]; then
+            echo "リポジトリシークレット TICK_URL と TICK_TOKEN を設定してください。"
+            exit 1
+          fi
+          curl -fsS --retry 3 --retry-delay 10 --max-time 60 \
+            -H "X-Tick-Token: ${TICK_TOKEN}" \
+            "$TICK_URL"
